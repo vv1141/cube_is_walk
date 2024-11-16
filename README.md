@@ -18,7 +18,7 @@ Cube Is Walk is a tiny puzzle game demonstrating the general principles of an En
 
 ## Pre-built binaries
 
-Pre-built binaries (x86 only) are available for Linux and Windows.
+Pre-built binaries (x86 only) are available for Linux and Windows in [releases](https://github.com/vv1141/cube_is_walk/releases).
 
 ## Building from source
 
