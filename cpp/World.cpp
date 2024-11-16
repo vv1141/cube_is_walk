@@ -1,8 +1,6 @@
 
 #include "World.h"
 
-#include <iostream>
-
 World*        World::world;
 flecs::entity World::menuState = flecs::entity::null();
 flecs::entity World::intermission = flecs::entity::null();
@@ -185,25 +183,25 @@ flecs::entity World::addGameObject(int type, int x, int y) {
   objects.emplace_back();
   objects.back().setPosition(glm::vec3(x, 0.0f, y));
   if(type == (int)TileType::grass) {
-    addRenderObject(&(grassModel), &(grassTexture), &(objects.back()));
+    addRenderObject(&(models["grass"]), &(textures["grass"]), &(objects.back()));
     newEntity.set(RenderObjectHandle{&(renderObjects.back())});
     newEntity.add<Grass>();
     newEntity.add<Walkable>();
   } else if(type == (int)TileType::grid) {
-    addRenderObject(&(gridModel), &(gridTexture), &(objects.back()));
+    addRenderObject(&(models["grid"]), &(textures["grid"]), &(objects.back()));
     newEntity.set(RenderObjectHandle{&(renderObjects.back())});
     newEntity.add<Grid>();
     newEntity.add<Walkable>();
     newEntity.add<Supporting>();
   } else if(type == (int)TileType::water) {
-    addRenderObject(&(waterModel), &(waterTexture), &(objects.back()));
+    addRenderObject(&(models["water"]), &(textures["water"]), &(objects.back()));
     newEntity.set(RenderObjectHandle{&(renderObjects.back())});
     newEntity.add<Water>();
   } else if(type == (int)TileType::cube) {
     cube = newEntity;
     cubeObject = &(objects.back());
     cubeObject->setOrientationFromDirection(glm::vec3(0.0f, 0.0f, -1.0f));
-    addRenderObject(&(cubeModel), &(cubeTexture), cubeObject);
+    addRenderObject(&(models["cube"]), &(textures["cube"]), &(objects.back()));
     newEntity.set(RenderObjectHandle{&(renderObjects.back())});
     newEntity.add<Cube>();
     newEntity.set(Carrying{flecs::entity::null()});
@@ -214,7 +212,7 @@ flecs::entity World::addGameObject(int type, int x, int y) {
 
     objects.emplace_back();
     objects.back().setPosition(glm::vec3(x, 0.0f, y));
-    addRenderObject(&(eyesModel), &(eyesTexture), &(objects.back()));
+    addRenderObject(&(models["eyes"]), &(textures["eyes"]), &(objects.back()));
     ecsWorld.entity()
       .set(RenderObjectHandle{&(renderObjects.back())})
       .add<Eyes>()
@@ -222,19 +220,19 @@ flecs::entity World::addGameObject(int type, int x, int y) {
       .set<Blink, Animation>({0.0f})
       .set<Peer, Animation>({0.0f});
   } else if(type == (int)TileType::goal) {
-    addRenderObject(&(goalModel), &(goalTexture), &(objects.back()));
+    addRenderObject(&(models["goal"]), &(textures["goal"]), &(objects.back()));
     newEntity.set(RenderObjectHandle{&(renderObjects.back())});
     newEntity.add<Goal>();
     newEntity.set(Carrying{flecs::entity::null()});
     newEntity.add<Walkable>();
   } else if(type == (int)TileType::boulder) {
-    addRenderObject(&(boulderModel), &(boulderTexture), &(objects.back()));
+    addRenderObject(&(models["boulder"]), &(textures["boulder"]), &(objects.back()));
     newEntity.set(RenderObjectHandle{&(renderObjects.back())});
     newEntity.add<Boulder>();
     newEntity.add<Blocking>();
     newEntity.add<Pushable>();
   } else if(type == (int)TileType::key) {
-    addRenderObject(&(keyModel), &(keyTexture), &(objects.back()));
+    addRenderObject(&(models["key"]), &(textures["key"]), &(objects.back()));
     newEntity.set(RenderObjectHandle{&(renderObjects.back())});
     newEntity.add<Key>();
     newEntity.set(Animation{0.0f});
@@ -242,7 +240,7 @@ flecs::entity World::addGameObject(int type, int x, int y) {
     newEntity.add<Blocking>();
     newEntity.add<Collectable>();
   } else if(type == (int)TileType::lock) {
-    addRenderObject(&(lockModel), &(lockTexture), &(objects.back()));
+    addRenderObject(&(models["lock"]), &(textures["lock"]), &(objects.back()));
     newEntity.set(RenderObjectHandle{&(renderObjects.back())});
     newEntity.add<Lock>();
     newEntity.set(Carrying{flecs::entity::null()});
@@ -252,8 +250,9 @@ flecs::entity World::addGameObject(int type, int x, int y) {
     helper = newEntity;
     helperObject = &(objects.back());
     helperObject->setOrientationFromDirection(glm::vec3(0.0f, 0.0f, -1.0f));
-    int helperIndex = levelHelpers.at(currentLevel);
-    addRenderObject(&(helpers.at(helperIndex).model), &(helpers.at(helperIndex).texture), &(objects.back()));
+    int               helperIndex = levelHelpers.at(currentLevel);
+    const std::string name = helpers.at(helperIndex).assetName;
+    addRenderObject(&(models[name]), &(textures[name]), &(objects.back()));
     newEntity.set(RenderObjectHandle{&(renderObjects.back())});
     newEntity.set(Dialogue{helpDialogue.at(currentLevel)});
     newEntity.add<Helper>();
@@ -265,7 +264,7 @@ flecs::entity World::addGameObject(int type, int x, int y) {
 
     objects.emplace_back();
     objects.back().setPosition(glm::vec3(x, 0.0f, y));
-    addRenderObject(&(eyesModel), &(eyesTexture), &(objects.back()));
+    addRenderObject(&(models["eyes"]), &(textures["eyes"]), &(objects.back()));
     ecsWorld.entity()
       .set(RenderObjectHandle{&(renderObjects.back())})
       .add<Eyes>()
@@ -553,7 +552,7 @@ void World::initSystems() {
                                  int ry = 95;
                                  Utility::renderRectangle(glm::vec2(wx, wy) + glm::vec2(-rx, -ry), glm::vec2(2 * rx, 2 * ry), sf::Color(0, 0, 0, 150));
                                  HelperData* data = &(world->helpers.at(world->levelHelpers.at(world->currentLevel)));
-                                 Utility::renderText(glm::vec2(wx, wy) + glm::vec2(-rx, -ry) + glm::vec2(10, 10), data->name, data->colour);
+                                 Utility::renderText(glm::vec2(wx, wy) + glm::vec2(-rx, -ry) + glm::vec2(10, 10), data->displayName, data->colour);
                                  Utility::renderText(glm::vec2(wx, wy) + glm::vec2(-rx, -ry) + glm::vec2(10, 60), dlg->text, sf::Color(255, 255, 255, 255));
                                }
                              }
@@ -648,7 +647,7 @@ bool World::readLevelFile(std::string path) {
   return false;
 }
 
-bool World::readAssetFile(std::string path) {
+bool World::readAssetFile(std::string path, bool readShaders) {
   char* memBlock;
   if(Utility::readFile(path, &memBlock, nullptr)) {
     char* memPointer = memBlock;
@@ -658,67 +657,36 @@ bool World::readAssetFile(std::string path) {
       return false;
     }
     Utility::initTextRendering();
-    cubeModel.readModelFromMemoryBlock(&memPointer);
-    cubeModel.bufferData();
-    if(!cubeTexture.loadTextures(&memPointer)) {
-      delete[] memBlock;
-      return false;
+    std::vector<std::string> modelNames;
+    modelNames.emplace_back("cube");
+    modelNames.emplace_back("eyes");
+    modelNames.emplace_back("grass");
+    modelNames.emplace_back("grid");
+    modelNames.emplace_back("goal");
+    modelNames.emplace_back("water");
+    modelNames.emplace_back("boulder");
+    modelNames.emplace_back("key");
+    modelNames.emplace_back("lock");
+    modelNames.emplace_back("tetrahedron");
+    modelNames.emplace_back("short_teapot");
+    modelNames.emplace_back("tall_teapot");
+    for(auto& name: modelNames) {
+      models[name] = Model();
+      textures[name] = Texture();
     }
-    eyesModel.readModelFromMemoryBlock(&memPointer);
-    eyesModel.bufferData();
-    if(!eyesTexture.loadTextures(&memPointer)) {
-      delete[] memBlock;
-      return false;
-    }
-    grassModel.readModelFromMemoryBlock(&memPointer);
-    grassModel.bufferData();
-    if(!grassTexture.loadTextures(&memPointer)) {
-      delete[] memBlock;
-      return false;
-    }
-    gridModel.readModelFromMemoryBlock(&memPointer);
-    gridModel.bufferData();
-    if(!gridTexture.loadTextures(&memPointer)) {
-      delete[] memBlock;
-      return false;
-    }
-    goalModel.readModelFromMemoryBlock(&memPointer);
-    goalModel.bufferData();
-    if(!goalTexture.loadTextures(&memPointer)) {
-      delete[] memBlock;
-      return false;
-    }
-    waterModel.readModelFromMemoryBlock(&memPointer);
-    waterModel.bufferData();
-    if(!waterTexture.loadTextures(&memPointer)) {
-      delete[] memBlock;
-      return false;
-    }
-    boulderModel.readModelFromMemoryBlock(&memPointer);
-    boulderModel.bufferData();
-    if(!boulderTexture.loadTextures(&memPointer)) {
-      delete[] memBlock;
-      return false;
-    }
-    keyModel.readModelFromMemoryBlock(&memPointer);
-    keyModel.bufferData();
-    if(!keyTexture.loadTextures(&memPointer)) {
-      delete[] memBlock;
-      return false;
-    }
-    lockModel.readModelFromMemoryBlock(&memPointer);
-    lockModel.bufferData();
-    if(!lockTexture.loadTextures(&memPointer)) {
-      delete[] memBlock;
-      return false;
-    }
-    for(int i = 0; i < helpers.size(); i++) {
-      helpers.at(i).model.readModelFromMemoryBlock(&memPointer);
-      helpers.at(i).model.bufferData();
-      if(!helpers.at(i).texture.loadTextures(&memPointer)) {
+    for(auto& name: modelNames) {
+      models[name].readModelFromMemoryBlock(&memPointer);
+      models[name].bufferData();
+      if(!textures[name].loadTextures(&memPointer)) {
         delete[] memBlock;
         return false;
       }
+    }
+    if(readShaders) {
+      opaqueShader.loadShaders(&memPointer);
+      shadowMappingShader.loadShaders(&memPointer);
+      blurShader.loadShaders(&memPointer);
+      screenShader.loadShaders(&memPointer);
     }
 
     delete[] memBlock;
@@ -736,10 +704,6 @@ World::~World() {
 
 bool World::init(sf::RenderWindow* renderWindow, Input* input) {
   // window, filesystem, input, and rendering
-
-  world = this;
-  levelDirectory = "res/levels";
-  saveFile = "res/gamesave";
 
   levelFiles.emplace_back("00");
   levelFiles.emplace_back("01");
@@ -762,15 +726,27 @@ bool World::init(sf::RenderWindow* renderWindow, Input* input) {
   levelHelpers.emplace_back(2);
   levelHelpers.emplace_back(1);
   levelHelpers.emplace_back(2);
-  helpers.emplace_back(HelperData{"Tetrahedron", sf::Color(255, 140, 40, 255)});
-  helpers.emplace_back(HelperData{"Short Teapot", sf::Color(180, 100, 210, 255)});
-  helpers.emplace_back(HelperData{"Tall Teapot", sf::Color(130, 235, 235, 255)});
+  helpers.emplace_back(HelperData{"tetrahedron", "Tetrahedron", sf::Color(255, 140, 40, 255)});
+  helpers.emplace_back(HelperData{"short_teapot", "Short Teapot", sf::Color(180, 100, 210, 255)});
+  helpers.emplace_back(HelperData{"tall_teapot", "Tall Teapot", sf::Color(130, 235, 235, 255)});
 
-  currentLevel = 0;
+  bool useAssetFileShaders = true;
+  if(!readAssetFile("res/assetdata", useAssetFileShaders)) return false;
+  if(!useAssetFileShaders) {
+    if(!opaqueShader.loadShaders("SimpleShader.vert", "SimpleShader.frag")) return false;
+    if(!shadowMappingShader.loadShaders("ShadowMappingShader.vert", "ShadowMappingShader.frag")) return false;
+    if(!blurShader.loadShaders("BlurShader.vert", "BlurShader.frag")) return false;
+    if(!screenShader.loadShaders("ScreenShader.vert", "ScreenShader.frag")) return false;
+  }
+  levelDirectory = "res/levels";
+  saveFile = "res/gamesave";
+
   tileSize = 40;
 
+  world = this;
   this->renderWindow = renderWindow;
   this->input = input;
+
   Utility::initRenderState(renderWindow, &projectionViewMatrix);
 
   glGenVertexArrays(1, &vertexArray);
@@ -803,7 +779,7 @@ bool World::init(sf::RenderWindow* renderWindow, Input* input) {
   initScenes();
   initSystems();
 
-  readAssetFile("res/assetdata");
+  currentLevel = 0;
   ecsWorld.add<ActiveScene, MenuScene>();
 
   return true;

@@ -49,7 +49,6 @@ public:
   void         bufferData();
   void         bindBuffers();
   void         bindVertexBuffer();
-  bool         loadObj(std::string directory, std::string fileName, float scale = 1.0f, bool triangulate = false, bool averageVertexNormals = false);
   void         readModelFromMemoryBlock(char** memPointer);
   void         copyModel(Model* model, float scale = 1.0f);
   int          getId();

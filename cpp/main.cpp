@@ -18,7 +18,7 @@ int main() {
   sf::RenderWindow renderWindow;
 
   sf::VideoMode screen = sf::VideoMode::getDesktopMode();
-  renderWindow.create(sf::VideoMode(1280, 720), "3d_engine", sf::Style::Titlebar | sf::Style::Close, settings);
+  renderWindow.create(sf::VideoMode(1280, 720), "Cube Is Walk", sf::Style::Titlebar | sf::Style::Close, settings);
   renderWindow.setActive(true);
   glEnable(GL_MULTISAMPLE);
   glViewport(0, 0, renderWindow.getSize().x, renderWindow.getSize().y);

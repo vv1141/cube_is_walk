@@ -205,10 +205,9 @@ private:
   float     followCameraSpeed;
 
   struct HelperData {
-    std::string name;
+    std::string assetName;
+    std::string displayName;
     sf::Color   colour;
-    Model       model;
-    Texture     texture;
   };
 
   std::string              levelDirectory;
@@ -233,24 +232,8 @@ private:
   std::list<RenderObject::ModelTexturePair> modelTexturePairs;
   std::list<RenderObject>                   renderObjects;
   std::list<Object>                         objects;
-  Model                                     cubeModel;
-  Texture                                   cubeTexture;
-  Model                                     eyesModel;
-  Texture                                   eyesTexture;
-  Model                                     grassModel;
-  Texture                                   grassTexture;
-  Model                                     gridModel;
-  Texture                                   gridTexture;
-  Model                                     goalModel;
-  Texture                                   goalTexture;
-  Model                                     waterModel;
-  Texture                                   waterTexture;
-  Model                                     boulderModel;
-  Texture                                   boulderTexture;
-  Model                                     keyModel;
-  Texture                                   keyTexture;
-  Model                                     lockModel;
-  Texture                                   lockTexture;
+  std::map<std::string, Model>              models;
+  std::map<std::string, Texture>            textures;
 
   glm::vec3                    lightPosition;
   glm::mat4                    projectionViewMatrix;
@@ -277,7 +260,7 @@ private:
   int  readSaveFile(std::string path);
   bool writeLevelFile(std::string path);
   bool readLevelFile(std::string path);
-  bool readAssetFile(std::string path);
+  bool readAssetFile(std::string path, bool readShaders);
 
 public:
   World();
